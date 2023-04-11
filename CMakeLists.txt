@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.18)
 
 include(FetchContent)
+include(cmake/FindMRuby.cmake)
 
 FetchContent_Declare(stb DOWNLOAD_EXTRACT_TIMESTAMP ON
     GIT_REPOSITORY "https://github.com/nothings/stb.git"
@@ -20,15 +21,10 @@ FetchContent_Declare(fmt DOWNLOAD_EXTRACT_TIMESTAMP ON
     GIT_REPOSITORY "https://github.com/fmtlib/fmt.git"
     GIT_TAG "9.1.0"
 )
-FetchContent_Declare(exprtk DOWNLOAD_EXTRACT_TIMESTAMP ON
-    GIT_REPOSITORY "https://github.com/ArashPartow/exprtk.git"
-    GIT_TAG "master"
-    UPDATE_COMMAND "${CMAKE_COMMAND}" -E copy <SOURCE_DIR>/exprtk.hpp <BINARY_DIR>
-)
 
-project(gfx2agb LANGUAGES CXX VERSION 0.0.0)
+project(gfx2agb LANGUAGES CXX VERSION 0.0.1)
 
-FetchContent_MakeAvailable(stb ctopt exprtk)
+FetchContent_MakeAvailable(stb ctopt)
 
 FetchContent_GetProperties(fmt)
 if(NOT fmt_POPULATED)
@@ -48,17 +44,10 @@ set_target_properties(gfx2agb PROPERTIES CXX_STANDARD 20)
 
 target_include_directories(gfx2agb PRIVATE include
     ${ctopt_BINARY_DIR}
-    ${exprtk_BINARY_DIR}
     ${stb_BINARY_DIR}
 )
 
-target_link_libraries(gfx2agb PRIVATE fmt)
+target_link_libraries(gfx2agb PRIVATE fmt mruby)
 target_compile_definitions(gfx2agb PRIVATE GFX2AGB_VERSION_MAJOR=${PROJECT_VERSION_MAJOR} GFX2AGB_VERSION_MINOR=${PROJECT_VERSION_MINOR} GFX2AGB_VERSION_PATCH=${PROJECT_VERSION_PATCH})
-
-if(MSVC)
-    set_source_files_properties(source/util.cpp PROPERTIES COMPILE_OPTIONS "/bigobj")
-else()
-    set_source_files_properties(source/util.cpp PROPERTIES COMPILE_OPTIONS "-Wa,-mbig-obj")
-endif()
 
 install(TARGETS gfx2agb DESTINATION bin)

@@ -2,24 +2,38 @@
 
 #include <array>
 
-#include <exprtk.hpp>
+#include <mruby.h>
+#include <mruby/compile.h>
+#include <mruby/variable.h>
+
+extern "C" {
+
+void mrb_init_mrblib(mrb_state* mrb) {}
+void mrb_init_mrbgems(mrb_state* mrb) {}
+void mrb_final_mrbgems(mrb_state* mrb) {}
+
+}
 
 std::pair<int, int> util::parse_width_height(int inWidth, int inHeight, const std::string& widthExpr, const std::string& heightExpr) noexcept {
-    auto symbol_table = exprtk::symbol_table<double>{};
-    symbol_table.add_constant("iw", inWidth);
-    symbol_table.add_constant("ih", inHeight);
-    symbol_table.add_constants();
+    auto* mrb = mrb_open();
 
-    auto expr = exprtk::expression<double>{};
-    expr.register_symbol_table(symbol_table);
+    mrb_define_global_const(mrb, "IW", mrb_fixnum_value(inWidth));
+    mrb_define_method(mrb, mrb->object_class, "iw", [](auto* mrb, auto self) {
+        return mrb_const_get(mrb, mrb_obj_value(mrb->object_class), mrb_intern_static(mrb, "IW", 2));
+    }, MRB_ARGS_NONE());
 
-    auto parser = exprtk::parser<double>{};
+    mrb_define_global_const(mrb, "IH", mrb_fixnum_value(inHeight));
+    mrb_define_method(mrb, mrb->object_class, "ih", [](auto* mrb, auto self) {
+        return mrb_const_get(mrb, mrb_obj_value(mrb->object_class), mrb_intern_static(mrb, "IH", 2));
+    }, MRB_ARGS_NONE());
 
-    parser.compile(widthExpr, expr);
-    const auto outWidth = static_cast<int>(std::round(expr.value()));
+    auto rw = mrb_load_string(mrb, widthExpr.c_str());
+    const auto outWidth = mrb_fixnum(rw);
 
-    parser.compile(heightExpr, expr);
-    const auto outHeight = static_cast<int>(std::round(expr.value()));
+    auto rh = mrb_load_string(mrb, heightExpr.c_str());
+    const auto outHeight = mrb_fixnum(rh);
+
+    mrb_close(mrb);
 
     return {outWidth, outHeight};
 }
