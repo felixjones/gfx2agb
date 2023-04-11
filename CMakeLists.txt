@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.18)
 
+project(gfx2agb LANGUAGES CXX VERSION 0.0.1)
+
 include(FetchContent)
 include(cmake/FindMRuby.cmake)
 
@@ -22,8 +24,6 @@ FetchContent_Declare(fmt DOWNLOAD_EXTRACT_TIMESTAMP ON
     GIT_TAG "9.1.0"
 )
 
-project(gfx2agb LANGUAGES CXX VERSION 0.0.1)
-
 FetchContent_MakeAvailable(stb ctopt)
 
 FetchContent_GetProperties(fmt)
@@ -38,6 +38,7 @@ add_executable(gfx2agb
     source/color_format.cpp
     source/image_io.cpp
     source/palette.cpp
+    source/script.cpp
     source/util.cpp
 )
 set_target_properties(gfx2agb PROPERTIES CXX_STANDARD 20)

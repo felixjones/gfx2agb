@@ -4,6 +4,7 @@
 #include "bitmap.hpp"
 #include "logging.hpp"
 #include "options.hpp"
+#include "script.hpp"
 
 int main(int argc, char* argv[]) {
     using namespace options;
@@ -36,8 +37,11 @@ int main(int argc, char* argv[]) {
 
     if (args.cbegin() != args.cend()) {
         // Check commands
-        if (*args.cbegin() == "bitmap") {
+        const auto& cmd = *args.cbegin();
+        if (cmd == "bitmap") {
             return bitmap(++args.cbegin(), args.cend());
+        } else if (cmd == "script") {
+            return script(++args.cbegin(), args.cend());
         }
     }
 

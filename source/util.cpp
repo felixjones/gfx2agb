@@ -6,14 +6,6 @@
 #include <mruby/compile.h>
 #include <mruby/variable.h>
 
-extern "C" {
-
-void mrb_init_mrblib(mrb_state* mrb) {}
-void mrb_init_mrbgems(mrb_state* mrb) {}
-void mrb_final_mrbgems(mrb_state* mrb) {}
-
-}
-
 std::pair<int, int> util::parse_width_height(int inWidth, int inHeight, const std::string& widthExpr, const std::string& heightExpr) noexcept {
     auto* mrb = mrb_open();
 
