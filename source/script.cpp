@@ -52,7 +52,7 @@ int script(ctopt::args::const_iterator begin, const ctopt::args::const_iterator&
     }
 
     mrb_close(mrb);
-    return mrb_fixnum(res);
+    return mrb_as_int(mrb, res);
 }
 
 static void add_classes(mrb_state* mrb) noexcept {
@@ -89,10 +89,10 @@ static void add_classes(mrb_state* mrb) noexcept {
     }, MRB_ARGS_REQ(1));
 
     mrb_define_method(mrb, imageClass, "width", [](auto* mrb, auto self) {
-        return mrb_fixnum_value(reinterpret_cast<image_type*>(DATA_PTR(self))->width);
+        return mrb_int_value(mrb, reinterpret_cast<image_type*>(DATA_PTR(self))->width);
     }, MRB_ARGS_NONE());
 
     mrb_define_method(mrb, imageClass, "height", [](auto* mrb, auto self) {
-        return mrb_fixnum_value(reinterpret_cast<image_type*>(DATA_PTR(self))->height);
+        return mrb_int_value(mrb, reinterpret_cast<image_type*>(DATA_PTR(self))->height);
     }, MRB_ARGS_NONE());
 }

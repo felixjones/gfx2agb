@@ -1,6 +1,7 @@
 #include "util.hpp"
 
 #include <array>
+#include <cstring>
 
 #include <mruby.h>
 #include <mruby/compile.h>
