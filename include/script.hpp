@@ -2,4 +2,4 @@
 
 #include <ctopt.hpp>
 
-int script(ctopt::args::const_iterator begin, ctopt::args::const_iterator end);
+int script(ctopt::args::const_iterator begin, const ctopt::args::const_iterator& end);

@@ -27,7 +27,7 @@ std::pair<int, int> util::parse_width_height(int inWidth, int inHeight, const st
 
     mrb_close(mrb);
 
-    return {outWidth, outHeight};
+    return std::make_pair(int(outWidth), int(outHeight));
 }
 
 std::vector<char> util::repack_data(const std::vector<std::size_t>& data, std::size_t bpp) noexcept {
