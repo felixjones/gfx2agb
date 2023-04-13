@@ -51,8 +51,9 @@ int script(ctopt::args::const_iterator begin, const ctopt::args::const_iterator&
         return 1;
     }
 
+    const auto retval = static_cast<int>(mrb_as_int(mrb, mrb_convert_type(mrb, res, MRB_TT_INTEGER, "Integer", "to_i")));
     mrb_close(mrb);
-    return mrb_as_int(mrb, res);
+    return retval;
 }
 
 static void add_classes(mrb_state* mrb) noexcept {

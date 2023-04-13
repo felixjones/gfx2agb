@@ -1,7 +1,6 @@
-find_package(Ruby)
+find_package(Ruby QUIET)
 
 if(NOT RUBY_EXECUTABLE)
-    message(STATUS "mruby -> OFF")
     return()
 endif()
 
@@ -17,6 +16,8 @@ if(NOT rake_script)
     endif()
 endif()
 
+include(FetchContent)
+
 FetchContent_Declare(mruby DOWNLOAD_EXTRACT_TIMESTAMP ON
     GIT_REPOSITORY "https://github.com/mruby/mruby.git"
     GIT_TAG "3.2.0"
@@ -28,8 +29,11 @@ FetchContent_MakeAvailable(mruby)
 set(mruby_library "${mruby_SOURCE_DIR}/build/host/lib/libmruby${CMAKE_STATIC_LIBRARY_SUFFIX}")
 add_custom_command(
     OUTPUT "${mruby_library}"
-    COMMAND "${CMAKE_COMMAND}" -E env MRUBY_CONFIG=gfx2agb -- "${RUBY_EXECUTABLE}" "${rake_script}"
+    COMMAND "${CMAKE_COMMAND}" -E env MRUBY_CONFIG=gfx2agb -- "${RUBY_EXECUTABLE}" "${rake_script}" > "${CMAKE_BINARY_DIR}/mruby-log.txt"
+    BYPRODUCTS "${CMAKE_BINARY_DIR}/mruby-log.txt"
     WORKING_DIRECTORY "${mruby_SOURCE_DIR}"
+    COMMENT "Building mruby static library ${mruby_library}"
+    VERBATIM
 )
 
 add_custom_target(configure_mruby DEPENDS "${mruby_library}")

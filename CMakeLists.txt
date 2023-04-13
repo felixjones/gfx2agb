@@ -2,8 +2,12 @@ cmake_minimum_required(VERSION 3.18)
 
 project(gfx2agb LANGUAGES CXX VERSION 0.0.1)
 
-include(FetchContent)
 include(cmake/FindMRuby.cmake)
+if(NOT RUBY_EXECUTABLE)
+    message(FATAL_ERROR "Could NOT find Ruby (missing: Ruby_EXECUTABLE)")
+endif()
+
+include(FetchContent)
 
 FetchContent_Declare(stb DOWNLOAD_EXTRACT_TIMESTAMP ON
     GIT_REPOSITORY "https://github.com/nothings/stb.git"
