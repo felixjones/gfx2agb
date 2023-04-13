@@ -8,6 +8,12 @@
 #include <numeric>
 #include <ranges>
 
+#include <mruby.h>
+#include <mruby/class.h>
+#include <mruby/data.h>
+#include <mruby/error.h>
+
+#include "logging.hpp"
 #include "stb_image_resize.h"
 #include "util.hpp"
 
@@ -300,4 +306,70 @@ std::vector<std::size_t> image::orientate(const std::vector<std::size_t>& image,
     }
 
     return result;
+}
+
+void image::register_script(mrb_state* mrb) noexcept {
+    struct image_type {
+        std::vector<float> data;
+        int width, height, channels;
+    };
+
+    static constexpr auto image_mrb_type = mrb_data_type{"Image", [](auto* mrb, auto* data) {
+        delete reinterpret_cast<image_type*>(data);
+    }};
+
+    auto* imageClass = mrb_define_class(mrb, "Image", mrb->object_class);
+    MRB_SET_INSTANCE_TT(imageClass, MRB_TT_CDATA);
+
+    mrb_define_method(mrb, imageClass, "initialize", [](auto* mrb, auto self) {
+        const char *path;
+        mrb_float gamma;
+        const auto argc = mrb_get_args(mrb, "z|f", &path, &gamma);
+
+        int width, height, channels;
+        vlog::print("Reading image {}", [&]() {return fmt::make_format_args(path);});
+        auto img = image::load(path, width, height, channels);
+        if (!img) {
+            fmt::print(stderr, "Could not read image {}", path);
+            mrb_sys_fail(mrb, path);
+        }
+
+        if (argc < 2) {
+            gamma = static_cast<mrb_float>(2.2);
+        }
+
+        mrb_data_init(self, new image_type{
+                std::move(image::to_float(img, width, height, static_cast<float>(gamma))),
+                width, height, channels
+        }, &image_mrb_type);
+
+        return self;
+    }, MRB_ARGS_ARG(1, 1));
+
+    mrb_define_method(mrb, imageClass, "width", [](auto* mrb, auto self) {
+        return mrb_int_value(mrb, reinterpret_cast<image_type*>(DATA_PTR(self))->width);
+    }, MRB_ARGS_NONE());
+
+    mrb_define_method(mrb, imageClass, "height", [](auto* mrb, auto self) {
+        return mrb_int_value(mrb, reinterpret_cast<image_type*>(DATA_PTR(self))->height);
+    }, MRB_ARGS_NONE());
+
+    mrb_define_method(mrb, imageClass, "resize", [](auto* mrb, auto self) {
+        const mrb_sym knames[2] = {
+            mrb_intern_static(mrb, "width", 5), mrb_intern_static(mrb, "height", 6)
+        };
+        mrb_value kvalues[2] = {};
+        const mrb_kwargs kwargs = {2, 2, knames, kvalues, nullptr};
+
+        mrb_get_args(mrb, ":", &kwargs);
+        const auto width = mrb_as_int(mrb, kvalues[0]);
+        const auto height = mrb_as_int(mrb, kvalues[1]);
+
+        auto* data = reinterpret_cast<image_type*>(DATA_PTR(self));
+        data->data = image::resize(data->data, data->width, data->height, width, height);
+        data->width = width;
+        data->height = height;
+
+        return self;
+    }, MRB_ARGS_REQ(2));
 }

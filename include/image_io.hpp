@@ -7,6 +7,8 @@
 
 #include "color_format.hpp"
 
+struct mrb_state;
+
 namespace image {
 
 std::unique_ptr<stbi_uc[], void(*)(void*)> load(const char* filename, int& width, int& height, int& channels) noexcept;
@@ -45,5 +47,7 @@ constexpr bool is_normal(direction major, direction minor) noexcept {
 
 std::vector<float> orientate(const std::vector<float>& image, int width, int height, direction major, direction minor) noexcept;
 std::vector<std::size_t> orientate(const std::vector<std::size_t>& image, int width, int height, direction major, direction minor) noexcept;
+
+void register_script(mrb_state* mrb) noexcept;
 
 } // namespace image
