@@ -22,8 +22,8 @@ namespace options {
         ctopt::option('o', "out-data").meta("filepath").help_text("Output: Binary data"),
         ctopt::option('p', "out-palette-data").meta("filepath").help_text("Output: Binary palette data"),
         ctopt::option('m', "mode").meta("integer").help_text("GBA bitmap background mode (3, 4, 5)").default_value("3"),
-        ctopt::option('w', "width").meta("integer").help_text("Bitmap width"),
-        ctopt::option('h', "height").meta("integer").help_text("Bitmap height"),
+        ctopt::option("width").meta("integer").help_text("Bitmap width"),
+        ctopt::option("height").meta("integer").help_text("Bitmap height"),
         ctopt::option('f', "format").meta("string").help_text("Output color format. Use --help-formats to view color format info.").default_value("g1BGR5"),
         ctopt::option('g', "gamma").meta("string").help_text("Gamma ratio input:output. eg: 2.2:4.0").default_value("2.2:2.2").min(1).max(2).separator(':'),
         ctopt::option('b', "bpp").meta("integer").help_text("Palette index bits per pixel").default_value("8"),
@@ -33,7 +33,10 @@ namespace options {
         ctopt::option("out-png").meta("filepath").help_text("Output: PNG image"),
         ctopt::option("out-palette-png").meta("filepath").help_text("Output: Palette as PNG image"),
         ctopt::option("out-palette-gpl").meta("filepath").help_text("Output: Palette as GPL file"),
-        ctopt::option("anti-alias").help_text("Apply sub-pixel anti-aliasing").flag_counter()
+        ctopt::option("anti-alias").help_text("Apply sub-pixel anti-aliasing").flag_counter(),
+        ctopt::option("out-colormap-data").meta("filepath").help_text("Output: Binary colormap data"),
+        ctopt::option("out-colormap-png").meta("filepath").help_text("Output: Colormap as PNG image"),
+        ctopt::option("colormap-size").meta("integer").help_text("Number of shades in the colormap").default_value("64")
     );
 
     static inline const auto help_str = fmt::format(R"({}

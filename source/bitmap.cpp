@@ -18,6 +18,9 @@ namespace {
     template <std::floating_point T>
     constexpr auto pc_display_sRGB = static_cast<T>(2.2);
 
+    template <std::floating_point T>
+    constexpr auto colormap_pow = static_cast<T>(2.2);
+
     constexpr auto png_components = 4;
 
     const auto png_pixel_format = color_format::parse("ABGR8");
@@ -163,6 +166,14 @@ int bitmap(ctopt::args::const_iterator begin, ctopt::args::const_iterator end) {
             }
         }
 
+        const auto* outputColormapPng = args.get<const char*>("out-colormap-png");
+        const auto* outputColormapData = args.get<const char*>("out-colormap-data");
+        const auto colormapSize = args.get<std::size_t>("colormap-size");
+        if (colormapSize <= 1) {
+            fmt::print(stderr, "Colormap size {} must be > 1", colormapSize);
+            return 1;
+        }
+
         if (outputPaletteGpl) {
             vlog::print("Writing {}", [&](){return fmt::make_format_args(outputPaletteGpl);});
             const auto data = palette::to_gpl(palette, 1.0f / outGamma);
@@ -184,6 +195,32 @@ int bitmap(ctopt::args::const_iterator begin, ctopt::args::const_iterator end) {
             const bool written = stbi_write_png(outputPng, outWidth, outHeight, png_components, imagePng.data(), outWidth * png_components);
             if (!written) {
                 fmt::print(stderr, "Could not write file {}", outputPng);
+                return 1;
+            }
+        }
+
+        if (outputColormapPng) {
+            vlog::print("Writing {}", [&](){return fmt::make_format_args(outputColormapPng);});
+
+            const auto flat = image::flatten(palette);
+            auto map = std::vector<float>{};
+            map.reserve(palette.size() * colormapSize * 4);
+            const auto step = 2.0f / colormapSize;
+            auto start = 2.0f;
+            for (auto yy = 0; yy < colormapSize; ++yy) {
+                for (const auto& e : palette) {
+                    map.emplace_back(e[0] * std::pow(start, colormap_pow<float>));
+                    map.emplace_back(e[1] * std::pow(start, colormap_pow<float>));
+                    map.emplace_back(e[2] * std::pow(start, colormap_pow<float>));
+                    map.emplace_back(e[3]);
+                }
+                start -= step;
+            }
+            const auto imagePng = image::to_data(map, palette.size(), colormapSize, 1.0f / outGamma, png_pixel_format);
+
+            const bool written = stbi_write_png(outputColormapPng, palette.size(), colormapSize, png_components, imagePng.data(), palette.size() * png_components);
+            if (!written) {
+                fmt::print(stderr, "Could not write file {}", outputColormapPng);
                 return 1;
             }
         }
@@ -217,6 +254,38 @@ int bitmap(ctopt::args::const_iterator begin, ctopt::args::const_iterator end) {
             ofs.write(
                 data.data(),
                 static_cast<std::streamsize>(data.size())
+            );
+            ofs.close();
+        }
+
+        if (outputColormapData) {
+            vlog::print("Writing {}", [&](){return fmt::make_format_args(outputColormapData);});
+
+            const auto flat = image::flatten(palette);
+            auto map = std::vector<float>{};
+            map.reserve(palette.size() * colormapSize * 4);
+            const auto step = 2.0f / colormapSize;
+            auto start = step; // upside-down for 0 = black, 1 = white
+            for (auto yy = 0; yy < colormapSize; ++yy) {
+                for (const auto& e : palette) {
+                    map.emplace_back(e[0] * std::pow(start, colormap_pow<float>));
+                    map.emplace_back(e[1] * std::pow(start, colormap_pow<float>));
+                    map.emplace_back(e[2] * std::pow(start, colormap_pow<float>));
+                    map.emplace_back(e[3]);
+                }
+                start += step;
+            }
+            const auto data = util::repack_data(image::palettize(map, palette), bpp);
+
+            auto ofs = std::ofstream(outputColormapData, std::ios::binary);
+            if (!ofs.is_open()) {
+                fmt::print(stderr, "Could not write file {}", outputColormapData);
+                return 1;
+            }
+
+            ofs.write(
+                    data.data(),
+                    static_cast<std::streamsize>(data.size())
             );
             ofs.close();
         }

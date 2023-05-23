@@ -23,11 +23,8 @@ std::vector<std::array<float, 4>> palette::extract(const std::vector<color_forma
 
     const auto channels = color_format::to_rgba_channels(format);
 
-    const auto color_compare = [&channels](color lhs, color rhs) {
-        return to_bits(channels, lhs) < to_bits(channels, rhs);
-    };
-
-    auto result = std::set<color, decltype(color_compare)>{color_compare};
+    auto result = std::vector<std::array<float, 4>>{};
+    result.reserve(width * height);
 
     const int stride = width * 4;
     for (int yy = 0; yy < height; ++yy) {
@@ -38,11 +35,11 @@ std::vector<std::array<float, 4>> palette::extract(const std::vector<color_forma
                 image[yy * stride + xx + 2],
                 image[yy * stride + xx + 3]
             };
-            result.emplace(col);
+            result.emplace_back(col);
         }
     }
 
-    return std::vector<std::array<float, 4>>{std::cbegin(result), std::cend(result)};
+    return result;
 }
 
 static auto to_bits(const std::array<color_format::color_channel_type, 4>& channels, std::array<float, 4> x) noexcept -> std::size_t {
