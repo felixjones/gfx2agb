@@ -38,12 +38,8 @@ endif()
 
 add_executable(gfx2agb
     source/main.cpp
-    source/bitmap.cpp
-    source/color_format.cpp
-    source/image_io.cpp
-    source/palette.cpp
-    source/script.cpp
-    source/util.cpp
+
+    source/filter_script.cpp
 )
 set_target_properties(gfx2agb PROPERTIES CXX_STANDARD 20)
 

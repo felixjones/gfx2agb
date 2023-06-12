@@ -1,10 +1,9 @@
 #include <ctopt.hpp>
 #include <fmt/format.h>
 
-#include "bitmap.hpp"
-#include "logging.hpp"
+#include "filter_script.hpp"
+
 #include "options.hpp"
-#include "script.hpp"
 
 int main(int argc, char* argv[]) {
     using namespace options;
@@ -26,28 +25,19 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
-    if (args.get<bool>("help-formats")) {
-        fmt::print("{}", help_formats);
-        return 0;
+    if (!args) {
+        fmt::print(stderr, "No command given\n");
+        fmt::print("{}", help_str);
+        return 1;
     }
 
-    if (args.get<bool>("verbose")) {
-        vlog::verbose = true;
+    // Check commands
+    const auto* script = args.get<const char*>("filter");
+    if (script) {
+        return filter::evaluate(script, args.get<std::vector<std::string>>("input"), args.get<std::vector<std::string>>("output"));
     }
 
-    if (args.cbegin() != args.cend()) {
-        // Check commands
-        const auto& cmd = *args.cbegin();
-        if (cmd == "bitmap") {
-            return bitmap(++args.cbegin(), args.cend());
-        } else if (cmd == "script") {
-            return script(++args.cbegin(), args.cend());
-        }
-    }
-
-    fmt::print(stderr, "No command given\n");
-    fmt::print("{}", help_str);
-    return 1;
+    return 0;
 }
 
 #define STB_IMAGE_IMPLEMENTATION
