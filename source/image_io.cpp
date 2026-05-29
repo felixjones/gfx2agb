@@ -8,7 +8,7 @@
 #include <numeric>
 #include <ranges>
 
-#include "stb_image_resize.h"
+#include "stb_image_resize2.h"
 #include "util.hpp"
 
 namespace {
@@ -48,10 +48,10 @@ std::vector<float> image::resize(const std::vector<float>& image, int inWidth, i
     auto result = std::vector<float>{};
     result.resize(outWidth * outHeight * rgba_channels);
 
-    stbir_resize_float(
+    stbir_resize_float_linear(
         image.data(), inWidth, inHeight, static_cast<int>(inWidth * rgba_channels * sizeof(float)),
         result.data(), outWidth, outHeight, static_cast<int>(outWidth * rgba_channels * sizeof(float)),
-        rgba_channels
+        STBIR_RGBA
     );
 
     return result;

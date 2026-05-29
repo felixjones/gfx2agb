@@ -7,7 +7,7 @@ FetchContent_Declare(stb DOWNLOAD_EXTRACT_TIMESTAMP ON
     GIT_TAG "master"
     UPDATE_COMMAND "${CMAKE_COMMAND}" -E copy
         <SOURCE_DIR>/stb_image.h
-        <SOURCE_DIR>/stb_image_resize.h
+        <SOURCE_DIR>/stb_image_resize2.h
         <SOURCE_DIR>/stb_image_write.h
         <BINARY_DIR>
 )
@@ -57,7 +57,7 @@ target_compile_definitions(gfx2agb PRIVATE GFX2AGB_VERSION_MAJOR=${PROJECT_VERSI
 
 if(MSVC)
     set_source_files_properties(source/util.cpp PROPERTIES COMPILE_OPTIONS "/bigobj")
-else()
+elseif(WIN32)
     set_source_files_properties(source/util.cpp PROPERTIES COMPILE_OPTIONS "-Wa,-mbig-obj")
 endif()
 
