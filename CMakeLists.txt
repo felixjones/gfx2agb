@@ -14,7 +14,7 @@ FetchContent_Declare(stb DOWNLOAD_EXTRACT_TIMESTAMP ON
     GIT_TAG "master"
     UPDATE_COMMAND "${CMAKE_COMMAND}" -E copy
         <SOURCE_DIR>/stb_image.h
-        <SOURCE_DIR>/stb_image_resize.h
+        <SOURCE_DIR>/stb_image_resize2.h
         <SOURCE_DIR>/stb_image_write.h
         <BINARY_DIR>
 )
